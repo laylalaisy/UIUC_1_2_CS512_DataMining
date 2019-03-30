@@ -12,8 +12,8 @@ Please try yourself and have fun working on those interesting projects!
 1. Linux/MacOS
 2. See each program/homework under different folders. I will not upload any resources from professor, I will only upload my work including homework, source code and related notes. If you find anything I should not open source, please email me.
 
-## HW
-- HW1: 
+## MP
+- MP1: NER + word2vec + cluster
 
 
 ## Tips:
