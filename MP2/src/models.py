@@ -36,17 +36,4 @@ class PriorModel:
         return pred_cids
 
 
-if __name__ == '__main__':
-    # Prior Model
-    model = models.PriorModel()
-    trainset = Dataset.get('train')
-    model.fit(trainset)
-    print('Training finished!')
-
-    for dsname in Dataset.ds2path.keys():
-        ds = Dataset.get(dsname)
-        pred_cids = model.predict(ds)
-        print(dsname, ds.eval(pred_cids))
-
-
 
