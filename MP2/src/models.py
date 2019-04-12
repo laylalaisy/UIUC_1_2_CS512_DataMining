@@ -1,7 +1,5 @@
 import random
-import models
-from dataset import Dataset
-
+import numpy as np
 
 class RandomModel:
     def __init__(self):
@@ -33,6 +31,28 @@ class PriorModel:
         pred_cids = []
         for mention in dataset.mentions:
             pred_cids.append(mention.candidates[0].id if mention.candidates else 'NIL')
+        return pred_cids
+
+
+''' 
+*** Model Name: SupModel ***
+*** Model Function: use a simple supervised model ***
+'''
+class SupModel:
+    def __init__(self):
+        pass
+
+    def fit(self, dataset):
+        for mention in dataset.mentions:
+            if mention.candidates:
+                x = np.zeros(16)
+                pred_cids.append(mention.gt.id if mention.gt else 'NIL')
+        pass
+
+    def predict(self, dataset):
+        pred_cids = []
+        for mention in dataset.mentions:
+            pred_cids.append(mention.gt.id if mention.gt else 'NIL')
         return pred_cids
 
 
