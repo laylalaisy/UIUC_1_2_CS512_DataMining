@@ -2,6 +2,8 @@ import random
 import numpy as np
 import random
 import textdistance
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 
 class RandomModel:
     def __init__(self):
@@ -42,45 +44,77 @@ class PriorModel:
 '''
 class SupModel:
     def __init__(self):
-        pass
+        self.model = None
 
     def fit(self, dataset):
+        X = []
+        y = []  # label
+
         for mention in dataset.mentions:
-            if mention.surface:
-                surface = mention.surface
+            surface = mention.surface
 
-                x = np.zeros(16)    # feature
-                y = []              # label
-
+            if mention.candidates:
+                # add feature values
                 i = 0
-                if mention.candidates:
+                candidates_name = []
+                x = np.zeros(16)  # feature
+                for candidate in mention.candidates:
+                    # feature1: similarity
+                    x[i] = textdistance.hamming.similarity(surface, candidate.name)
+                    i += 1
+                    # feature2: prob
+                    x[i] = candidate.prob
+                    i += 1
+                    candidates_name.append(candidate.name)
+                X.append(x)
 
-                    # add feature values
-                    candidates_name = []
-                    for candidate in mention.candidates:
-                        if len(candidate.name)>0:
-                            # feature1: similarity
-                            x[i] = textdistance.hamming.similarity(surface, candidate.name)
-                            i += 1
-                            # feature2: prob
-                            x[i] = candidate.prob
-                            i += 1
-                            candidates_name.append(candidate.name)
+                try:
+                    y.append(candidates_name.index(mention.gt.name))
+                except ValueError:
+                    y.append(-1)
+            else:
+                y.append(-1)
 
-                    # add label
-                    try:
-                        label_index = candidates_name.index(mention.gt.name)
+        X = np.array(X)
+        y = np.array(y)
+        # self.model = SVC().fit(X, y)
+        self.model = LogisticRegression(solver='lbfgs', multi_class='multinomial').fit(X, y)
 
-                    except ValueError:
-                        label_index = y.append(random.randint(0, 8))
-                    y.append(label_index)
-                
 
     def predict(self, dataset):
         pred_cids = []
+        total = 0
+        correct = 0
         for mention in dataset.mentions:
-            pred_cids.append(mention.gt.id if mention.gt else 'NIL')
+            surface = mention.surface
+
+            if mention.candidates:
+                # add feature values
+                i = 0
+                x = np.zeros(16)  # feature
+                for candidate in mention.candidates:
+                    # feature1: similarity
+                    x[i] = textdistance.hamming.similarity(surface, candidate.name)
+                    i += 1
+                    # feature2: prob
+                    x[i] = candidate.prob
+                    i += 1
+
+                predict_idx = self.model.predict(x.reshape(1, -1))[0]
+                if predict_idx == -1:
+                    pred_cids.append('NIL')
+                else:
+                    pred_cids.append(mention.candidates[predict_idx].id)
+            else:
+                pred_cids.append('NIL')
+
         return pred_cids
+
+
+
+
+
+
 
 
 
