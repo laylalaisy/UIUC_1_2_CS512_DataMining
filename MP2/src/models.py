@@ -4,6 +4,8 @@ import random
 import textdistance
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
 
 class RandomModel:
     def __init__(self):
@@ -57,13 +59,16 @@ class SupModel:
                 # add feature values
                 i = 0
                 candidates_name = []
-                x = np.zeros(16)  # feature
+                x = np.zeros(24)  # feature
                 for candidate in mention.candidates:
-                    # feature1: similarity
-                    x[i] = textdistance.hamming.similarity(surface, candidate.name)
-                    i += 1
-                    # feature2: prob
+                    # feature1: prob
                     x[i] = candidate.prob
+                    i += 1
+                    # feature2: similarity
+                    x[i] = textdistance.hamming.normalized_similarity(surface, candidate.name)
+                    i += 1
+                    # feature2: similarity
+                    x[i] = textdistance.hamming.normalized_distance(surface, candidate.name)
                     i += 1
                     candidates_name.append(candidate.name)
                 X.append(x)
@@ -78,31 +83,33 @@ class SupModel:
         X = np.array(X)
         y = np.array(y)
         # self.model = SVC().fit(X, y)
-        self.model = LogisticRegression(solver='lbfgs', multi_class='multinomial').fit(X, y)
+        # self.model = LogisticRegression(solver='lbfgs', multi_class='multinomial').fit(X, y)
+        self.model = RandomForestClassifier().fit(X, y)
+
 
 
     def predict(self, dataset):
         pred_cids = []
-        total = 0
-        correct = 0
         for mention in dataset.mentions:
             surface = mention.surface
 
             if mention.candidates:
                 # add feature values
                 i = 0
-                x = np.zeros(16)  # feature
+                x = np.zeros(24)  # feature
                 for candidate in mention.candidates:
-                    # feature1: similarity
-                    x[i] = textdistance.hamming.similarity(surface, candidate.name)
-                    i += 1
-                    # feature2: prob
+                    # feature1: prob
                     x[i] = candidate.prob
                     i += 1
-
+                    # feature2: similarity
+                    x[i] = textdistance.hamming.normalized_similarity(surface, candidate.name)
+                    i += 1
+                    # feature2: similarity
+                    x[i] = textdistance.hamming.normalized_distance(surface, candidate.name)
+                    i += 1
                 predict_idx = self.model.predict(x.reshape(1, -1))[0]
                 if predict_idx == -1:
-                    pred_cids.append('NIL')
+                    pred_cids.append(mention.candidates[0].id)
                 else:
                     pred_cids.append(mention.candidates[predict_idx].id)
             else:
