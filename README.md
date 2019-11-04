@@ -5,7 +5,7 @@ Please try yourself and have fun working on those interesting projects!
 
 ## Courese Information：
 1. Course: CS 512 Data Mining and Principals
-2. Time: 2019/01/14- 2018/05/12 
+2. Time: 2019/01/14- 2019/05/12 
 3. Teacher: Jiawei Han  
 
 ## Program Infromation:
